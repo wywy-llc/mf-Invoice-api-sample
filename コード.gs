@@ -17,7 +17,6 @@ function initialize() {
       }
     }
   }
-
 }
 
 /**
@@ -69,7 +68,7 @@ function getMfClient_() {
   const scriptProps = PropertiesService.getScriptProperties();
   const clientId = scriptProps.getProperty('CLIENT_ID');
   const clientSecret = scriptProps.getProperty('CLIENT_SECRET');
-  MfInvoiceClient.createClient(clientId, clientSecret);
+  return MfInvoiceClient.create(clientId, clientSecret);
 }
 
 function testbillingsList() {

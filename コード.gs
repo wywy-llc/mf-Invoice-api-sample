@@ -17,6 +17,15 @@ function initialize() {
       }
     }
   }
+
+}
+
+/**
+ * リダイレクトURIを取得します。
+ * @return {string} リダイレクトURI
+ */
+function getRedirectUri() {
+  console.log(MfInvoiceClient.getRedirectUri());
 }
 
 /**
@@ -35,7 +44,10 @@ function onOpen() {
  * MF請求書API認証ダイアログを表示します。
  */
 function showMfApiAuthDialog() {
-  MfInvoiceClient.showMfApiAuthDialog();
+  const scriptProps = PropertiesService.getScriptProperties();
+  const clientId = scriptProps.getProperty('CLIENT_ID');
+  const clientSecret = scriptProps.getProperty('CLIENT_SECRET');
+  MfInvoiceClient.showMfApiAuthDialog(clientId, clientSecret);
 }
 
 /**
@@ -43,7 +55,10 @@ function showMfApiAuthDialog() {
  * @param request
  */
 function mfCallback(request) {
-  return MfInvoiceClient.mfCallback(request);
+  const scriptProps = PropertiesService.getScriptProperties();
+  const clientId = scriptProps.getProperty('CLIENT_ID');
+  const clientSecret = scriptProps.getProperty('CLIENT_SECRET');
+  return MfInvoiceClient.mfCallback(request, clientId, clientSecret);
 }
 
 /**
@@ -51,7 +66,10 @@ function mfCallback(request) {
  * @returns {MfInvoiceClient}
  */
 function getMfClient_() {
-  MfInvoiceClient.createClient();
+  const scriptProps = PropertiesService.getScriptProperties();
+  const clientId = scriptProps.getProperty('CLIENT_ID');
+  const clientSecret = scriptProps.getProperty('CLIENT_SECRET');
+  MfInvoiceClient.createClient(clientId, clientSecret);
 }
 
 function testbillingsList() {

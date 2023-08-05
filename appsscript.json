@@ -1,0 +1,15 @@
+{
+  "timeZone": "Asia/Tokyo",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "MfInvoiceClient",
+        "libraryId": "1eG_PHTIqUiVsYjMlhWyDy5qJrjA3bFpvMUaZK3Ron8MeyQe80eV9YTNQ",
+        "version": "0",
+        "developmentMode": true
+      }
+    ]
+  }
+}

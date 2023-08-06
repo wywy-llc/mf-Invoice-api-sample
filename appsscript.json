@@ -5,7 +5,7 @@
   "dependencies": {
     "libraries": [
       {
-        "userSymbol": "MfInvoiceClient",
+        "userSymbol": "MfInvoiceApi",
         "version": "0",
         "libraryId": "1eG_PHTIqUiVsYjMlhWyDy5qJrjA3bFpvMUaZK3Ron8MeyQe80eV9YTNQ",
         "developmentMode": true

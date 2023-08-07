@@ -1,22 +1,206 @@
 /**
  * 初期設定
- * ・トリガー設定
+ * ・トリガー作成
+ * ・シート作成
  */
 function initialize() {
-  // トリガー設定
-  const functionNames = ['onOpen'];
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const triggers = ScriptApp.getProjectTriggers();
-  for (const trigger of triggers) {
-    const fname = trigger.getHandlerFunction();
-    if (functionNames.includes(fname)) {
-      ScriptApp.deleteTrigger(trigger);
-      switch (fname) {
-        case 'onOpen':
-          ScriptApp.newTrigger(fname).forSpreadsheet(spreadsheet).onOpen().create();
+  const initTriggers = () => {
+    // トリガー作成
+    const functionNames = ['onOpen'];
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const triggers = ScriptApp.getProjectTriggers();
+    for (const trigger of triggers) {
+      const fname = trigger.getHandlerFunction();
+      if (functionNames.includes(fname)) {
+        ScriptApp.deleteTrigger(trigger);
+        switch (fname) {
+          case 'onOpen':
+            ScriptApp.newTrigger(fname).forSpreadsheet(spreadsheet).onOpen().create();
+        }
       }
     }
   }
+  const headers = {
+    office: [
+      'id',
+      'name',
+      'zip',
+      'prefecture',
+      'address1',
+      'address2',
+      'tel',
+      'fax',
+      'office_type',
+      'office_code',
+      'registration_code',
+      'created_at',
+      'updated_at',
+    ],
+    items: [
+      'id',
+      'code',
+      'name',
+      'name_kana',
+      'name_suffix',
+      'memo',
+      'created_at',
+      'updated_at',
+      'departments',
+    ],
+    partners: [
+      'id',
+      'code',
+      'name',
+      'name_kana',
+      'name_suffix',
+      'memo',
+      'created_at',
+      'updated_at',
+      'departments',
+    ],
+    items: [
+      'id',
+      'name',
+      'code',
+      'detail',
+      'unit',
+      'price',
+      'quantity',
+      'is_deduct_withholding_tax',
+      'excise',
+      'created_at',
+      'updated_at'
+    ],
+    billings: ['id',
+      'pdf_url',
+      'operator_id',
+      'department_id',
+      'member_id',
+      'member_name',
+      'partner_id',
+      'partner_name',
+      'office_id',
+      'office_name',
+      'office_detail',
+      'title',
+      'memo',
+      'payment_condition',
+      'billing_date',
+      'due_date',
+      'sales_date',
+      'billing_number',
+      'note',
+      'document_name',
+      'payment_status',
+      'email_status',
+      'posting_status',
+      'created_at',
+      'updated_at',
+      'is_downloaded',
+      'is_locked',
+      'deduct_price',
+      'tag_names',
+      'items',
+      'excise_price',
+      'excise_price_of_untaxable',
+      'excise_price_of_non_taxable',
+      'excise_price_of_tax_exemption',
+      'excise_price_of_five_percent',
+      'excise_price_of_eight_percent',
+      'excise_price_of_eight_percent_as_reduced_tax_rate',
+      'excise_price_of_ten_percent',
+      'subtotal_price',
+      'subtotal_of_untaxable_excise',
+      'subtotal_of_non_taxable_excise',
+      'subtotal_of_tax_exemption_excise',
+      'subtotal_of_five_percent_excise',
+      'subtotal_of_eight_percent_excise',
+      'subtotal_of_eight_percent_as_reduced_tax_rate_excise',
+      'subtotal_of_ten_percent_excise',
+      'subtotal_with_tax_of_untaxable_excise',
+      'subtotal_with_tax_of_non_taxable_excise',
+      'subtotal_with_tax_of_five_percent_excise',
+      'subtotal_with_tax_of_tax_exemption_excise',
+      'subtotal_with_tax_of_eight_percent_excise',
+      'subtotal_with_tax_of_eight_percent_as_reduced_tax_rate_excise',
+      'subtotal_with_tax_of_ten_percent_excise',
+      'total_price',
+      'registration_code',
+      'use_invoice_template'],
+    quotes: [
+      'id',
+      'pdf_url',
+      'operator_id',
+      'department_id',
+      'member_id',
+      'member_name',
+      'partner_id',
+      'partner_name',
+      'partner_detail',
+      'office_id',
+      'office_name',
+      'office_detail',
+      'title',
+      'memo',
+      'quote_date',
+      'quote_number',
+      'note',
+      'expired_date',
+      'document_name',
+      'order_status',
+      'transmit_status',
+      'posting_status',
+      'created_at',
+      'updated_at',
+      'is_downloaded',
+      'is_locked',
+      'deduct_price',
+      'tag_names',
+      'items',
+      'excise_price',
+      'excise_price_of_untaxable',
+      'excise_price_of_non_taxable',
+      'excise_price_of_tax_exemption',
+      'excise_price_of_five_percent',
+      'excise_price_of_eight_percent',
+      'excise_price_of_eight_percent_as_reduced_tax_rate',
+      'excise_price_of_ten_percent',
+      'subtotal_price',
+      'subtotal_of_untaxable_excise',
+      'subtotal_of_non_taxable_excise',
+      'subtotal_of_tax_exemption_excise',
+      'subtotal_of_five_percent_excise',
+      'subtotal_of_eight_percent_excise',
+      'subtotal_of_eight_percent_as_reduced_tax_rate_excise',
+      'subtotal_of_ten_percent_excise',
+      'total_price'
+    ]
+  };
+  const initSheets = () => {
+    // シート作成
+    const client = getMfClient_();
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    for (const attr in client) {
+      console.log(attr);
+      let sheet = spreadsheet.getSheetByName(attr);
+      if (sheet) {
+        spreadsheet.deleteSheet(sheet);
+      }
+      sheet = spreadsheet.insertSheet(attr);
+      const headerNames = headers[attr];
+      if (!headerNames) {
+        continue;
+      }
+      const range = sheet.getRange(1, 1, 1, headerNames.length);
+      range.setBackground("#bdbdbd");
+      range.setValues([headerNames]);
+      if (headerNames.length < sheet.getMaxColumns()) {
+        sheet.deleteColumns(headerNames.length + 1, sheet.getMaxColumns() - headerNames.length);
+      }
+    }
+  }
+  initTriggers();
+  initSheets();
 }
 
 /**
@@ -74,7 +258,7 @@ function getMfClient_() {
 /**
  * 全てのAPIをテスト実行します。
  */
-function testAllApi(){
+function testAllApi() {
   //  事業者情報の取得
   getMyOffice();
 
@@ -121,6 +305,15 @@ function getMyOffice() {
   // API実行： 事業者情報の取得
   const office = getMfClient_().office.getMyOffice();
   console.log(office);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("office");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in office) {
+    row.push(office[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 //== Partner ==
@@ -157,6 +350,15 @@ function createNewPartner() {
   const createdPartner = getMfClient_().partners.createNew(partner);
 
   console.log(createdPartner);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("partners");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in createdPartner) {
+    row.push(createdPartner[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 /**
@@ -168,6 +370,21 @@ function getPartners() {
   console.log(partners.data);
   console.log(partners.data[0].departments);
   console.log('件数： ' + partners.pagination.total_count);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("partners");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  for (const partner of partners.data) {
+    const row = [];
+    for (const attr in partner) {
+      if (attr === 'departments') {
+        row.push(JSON.stringify(partner[attr]));
+        continue;
+      }
+      row.push(partner[attr]);
+    }
+    sheet.appendRow(row);
+  }
 }
 
 //== Item(品目) ==
@@ -178,18 +395,28 @@ function getPartners() {
 function createNewItem() {
   // 品目
   const newItem = {
-    name: 'Name',
+    name: '品名',
     code: new Date().getTime().toString(),
-    detail: 'Detal',
-    unit: 'Unit',
-    price: '1239.1',
-    quantity: '1',
+    detail: '品目詳細',
+    unit: '単位',
+    price: 1239,
+    quantity: 1,
+    is_deduct_withholding_tax: true,
     excise: 'ten_percent',
   }
 
   // API実行： 品目の作成
   const createdItem = getMfClient_().items.createNew(newItem);
   console.log(createdItem);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("items");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in createdItem) {
+    row.push(createdItem[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 /**
@@ -200,6 +427,16 @@ function getItems() {
   const items = getMfClient_().items.getItems();
   console.log(items.data);
   console.log('件数： ' + items.pagination.total_count);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("items");
+  for (const item of items.data) {
+    const row = [];
+    for (const attr in item) {
+      row.push(item[attr]);
+    }
+    sheet.appendRow(row);
+  }
 }
 
 
@@ -214,6 +451,15 @@ function getItem() {
   // API実行： 品目の取得
   const targetItem = getMfClient_().items.getItem(itemId);
   console.log(targetItem);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("items");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in targetItem) {
+    row.push(targetItem[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 //== Billing(請求書) ==
@@ -232,8 +478,6 @@ function createNewInvoiceTemplateBilling() {
   // 商品ID(item.id)の準備
   const items = getMfClient_().items.getItems();
   const item = items.data[0];
-  item.created_at = '';
-  item.updated_at = '';
   console.log(`item: ${JSON.stringify(item)}`);
 
   // 先月末
@@ -254,7 +498,7 @@ function createNewInvoiceTemplateBilling() {
     billing_date: endDateLastMonth,
     due_date: endDateBaseMonth,
     sales_date: today,
-    billing_number: new Date().getTime(),
+    billing_number: new Date().getTime().toString(),
     note: '備考',
     document_name: '帳票名',
     tag_names: [
@@ -278,6 +522,19 @@ function createNewInvoiceTemplateBilling() {
   const createdBillging = getMfClient_().billings.createNew(billging);
 
   console.log(createdBillging);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billings");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in createdBillging) {
+    if (attr === 'items' || attr === 'tag_names') {
+      row.push(JSON.stringify(createdBillging[attr]));
+      continue;
+    }
+    row.push(createdBillging[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 /**
@@ -300,8 +557,23 @@ function getBillings() {
 
   // API実行： 請求書一覧の取得
   const billings = getMfClient_().billings.getBillings(from, to, query);
-  console.log(billings);
+  console.log(billings.data[0]);
   console.log('件数: ' + billings.pagination.total_count);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billings");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  for (const billing of billings.data) {
+    const row = [];
+    for (const attr in billing) {
+      if (attr === 'items' || attr === 'tag_names') {
+        row.push(JSON.stringify(billing[attr]));
+        continue;
+      }
+      row.push(billing[attr]);
+    }
+    sheet.appendRow(row);
+  }
 }
 
 /**
@@ -321,6 +593,19 @@ function getBilling() {
   // API実行： 請求書の取得
   const billing = getMfClient_().billings.getBilling(billingId);
   console.log(billing);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billings");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in billing) {
+    if (attr === 'items' || attr === 'tag_names') {
+      row.push(JSON.stringify(billing[attr]));
+      continue;
+    }
+    row.push(billing[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 //== Quote(見積書) ==
@@ -375,12 +660,25 @@ function createNewQuote() {
     ],
     document_name: '帳票名'
   }
+  console.log(quote);
 
   // API実行： 見積書の登録
   const createdQuote = getMfClient_().quotes.createNew(quote);
 
   console.log(createdQuote);
 
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("quotes");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in createdQuote) {
+    if (attr === 'items' || attr === 'tag_names') {
+      row.push(JSON.stringify(createdQuote[attr]));
+      continue;
+    }
+    row.push(createdQuote[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 /**
@@ -403,13 +701,28 @@ function getQuotes() {
   // API実行： 見積一覧の取得
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
 
-  console.log(quotes);
+  console.log(quotes.data[0]);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("quotes");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  for (const quote of quotes.data) {
+    const row = [];
+    for (const attr in quote) {
+      if (attr === 'items' || attr === 'tag_names') {
+        row.push(JSON.stringify(quote[attr]));
+        continue;
+      }
+      row.push(quote[attr]);
+    }
+    sheet.appendRow(row);
+  }
 }
 
 /**
  * 見積書の取得
  */
-function getQuote(){
+function getQuote() {
   // 見積書IDの準備
   const baseDate = new Date();
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
@@ -422,4 +735,17 @@ function getQuote(){
   // API実行： 見積書IDの取得
   const quote = getMfClient_().quotes.getQuote(quoteId);
   console.log(quote);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("quotes");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in quote) {
+    if (attr === 'items' || attr === 'tag_names') {
+      row.push(JSON.stringify(quote[attr]));
+      continue;
+    }
+    row.push(quote[attr]);
+  }
+  sheet.appendRow(row);
 }

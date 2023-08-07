@@ -132,23 +132,23 @@ function createNewPartner() {
   // 取引先
   const partner = {
     code: new Date().getTime().toString(),
-    name: "取引先名",
-    name_kana: "取引先名(カナ)",
-    name_suffix: "御中",
-    memo: "メモ",
+    name: '取引先名',
+    name_kana: '取引先名(カナ)',
+    name_suffix: '御中',
+    memo: 'メモ',
     departments: [
       {
-        zip: "770-0053",
-        tel: "03-1234-5678",
-        prefecture: "徳島県",
-        address1: "徳島市 南島田町２丁目５８ー３",
-        address2: "オレス南島田Ｂ棟",
-        person_name: "担当者_氏名",
-        person_title: "担当者_役職",
-        person_dept: "担当者_部門",
-        office_member_name: "自社担当者_氏名",
-        email: "sample@example.com",
-        cc_emails: "sample_cc_01@example.com,sample_cc_02@example.com"
+        zip: '770-0053',
+        tel: '03-1234-5678',
+        prefecture: '徳島県',
+        address1: '徳島市 南島田町２丁目５８ー３',
+        address2: 'オレス南島田Ｂ棟',
+        person_name: '担当者_氏名',
+        person_title: '担当者_役職',
+        person_dept: '担当者_部門',
+        office_member_name: '自社担当者_氏名',
+        email: 'sample@example.com',
+        cc_emails: 'sample_cc_01@example.com,sample_cc_02@example.com'
       }
     ]
   }
@@ -166,6 +166,7 @@ function getPartners() {
   // API実行： 取引先一覧の取得
   const partners = getMfClient_().partners.getPartners();
   console.log(partners.data);
+  console.log(partners.data[0].departments);
   console.log('件数： ' + partners.pagination.total_count);
 }
 
@@ -177,13 +178,13 @@ function getPartners() {
 function createNewItem() {
   // 品目
   const newItem = {
-    name: "Name",
+    name: 'Name',
     code: new Date().getTime().toString(),
-    detail: "Detal",
-    unit: "Unit",
-    price: "1239.1",
-    quantity: "1",
-    excise: "ten_percent",
+    detail: 'Detal',
+    unit: 'Unit',
+    price: '1239.1',
+    quantity: '1',
+    excise: 'ten_percent',
   }
 
   // API実行： 品目の作成
@@ -247,21 +248,21 @@ function createNewInvoiceTemplateBilling() {
   // 請求書
   const billging = {
     department_id: department.id,
-    title: "件名",
-    memo: "メモ",
-    payment_condition: "振込先",
+    title: '件名',
+    memo: 'メモ',
+    payment_condition: '振込先',
     billing_date: endDateLastMonth,
     due_date: endDateBaseMonth,
     sales_date: today,
     billing_number: new Date().getTime(),
-    note: "備考",
-    document_name: "帳票名",
+    note: '備考',
+    document_name: '帳票名',
     tag_names: [
-      "タグ"
+      'タグ'
     ],
     items: [{
       item_id: item.id,
-      delivery_number: "1234Num567",
+      delivery_number: '1234Num567',
       delivery_date: today,
       detail: item.detail,
       unit: item.unit,
@@ -353,13 +354,13 @@ function createNewQuote() {
   const quote = {
     department_id: department.id,
     quote_number: new Date().getTime().toString(),
-    title: "件名",
-    memo: "メモ",
+    title: '件名',
+    memo: 'メモ',
     quote_date: endDateLastMonth,
     expired_date: endDateBaseMonth,
-    note: "備考",
+    note: '備考',
     tag_names: [
-      "タグ"
+      'タグ'
     ],
     items: [
       {
@@ -372,7 +373,7 @@ function createNewQuote() {
         excise: item.excise
       }
     ],
-    document_name: "帳票名"
+    document_name: '帳票名'
   }
 
   // API実行： 見積書の登録

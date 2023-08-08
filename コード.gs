@@ -181,7 +181,6 @@ function initialize() {
     const client = getMfClient_();
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
     for (const attr in client) {
-      console.log(attr);
       let sheet = spreadsheet.getSheetByName(attr);
       if (sheet) {
         spreadsheet.deleteSheet(sheet);
@@ -472,13 +471,11 @@ function createNewInvoiceTemplateBilling() {
   const partners = getMfClient_().partners.getPartners();
   const partner = partners.data[0];
   const department = partner.departments[0];
-  console.log(`department.id: ${department.id}`);
   const dateUtil = MfInvoiceApi.getDateUtil(new Date());
 
   // 商品ID(item.id)の準備
   const items = getMfClient_().items.getItems();
   const item = items.data[0];
-  console.log(`item: ${JSON.stringify(item)}`);
 
   // 先月末
   const endDateLastMonth = dateUtil.getEndDateLastMonth();
@@ -516,7 +513,6 @@ function createNewInvoiceTemplateBilling() {
       excise: item.excise
     }]
   }
-  console.log(billging)
 
   // API実行： 請求書の作成
   const createdBillging = getMfClient_().billings.createNew(billging);
@@ -588,7 +584,6 @@ function getBilling() {
   const query = '入金済み';
   const billings = getMfClient_().billings.getBillings(from, to, query);
   const billingId = billings.data[0].id
-  console.log(`billingId: ${billingId}`);
 
   // API実行： 請求書の取得
   const billing = getMfClient_().billings.getBilling(billingId);
@@ -618,12 +613,10 @@ function createNewQuote() {
   const partners = getMfClient_().partners.getPartners();
   const partner = partners.data[0];
   const department = partner.departments[0];
-  console.log(`department.id: ${department.id}`);
 
   // 商品ID(item.id)の取得
   const items = getMfClient_().items.getItems();
   const item = items.data[0];
-  console.log(`item: ${JSON.stringify(item)}`);
 
   // 日付操作
   const baseDate = new Date();
@@ -660,7 +653,6 @@ function createNewQuote() {
     ],
     document_name: '帳票名'
   }
-  console.log(quote);
 
   // API実行： 見積書の登録
   const createdQuote = getMfClient_().quotes.createNew(quote);

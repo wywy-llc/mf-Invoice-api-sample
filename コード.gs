@@ -282,6 +282,9 @@ function testAllApi() {
   // 取引先の取得
   getPartner();
 
+  // 取引先の更新
+  updatePartner();
+
   // 品目の作成
   createNewItem();
 

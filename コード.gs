@@ -425,9 +425,29 @@ function getPartner() {
     row.push(partner[attr]);
   }
   sheet.appendRow(row);
-
 }
 
+/**
+ * 取引先の更新
+ */
+function updatePartner(){
+  // 取引先の準備
+  const partners = getMfClient_().partners.getPartners();
+  const partner = partners.data[0];
+
+  // 取引先オブジェクト
+  const partnerReqBody = {
+    code: partner.code + '_更新',
+    name: partner.name + '_更新',
+    name_kana: partner.name + '_更新', 
+    name_suffix: '様',
+    memo: partner.memo + '_更新',
+  }
+
+  // API実行： 取引先の更新
+  const updatedPartner = getMfClient_().partners.updatePartner(partner.id, partnerReqBody);
+  console.log(updatedPartner);
+}
 
 //== Item(品目) ==
 

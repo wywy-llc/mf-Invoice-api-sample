@@ -294,6 +294,9 @@ function testAllApi() {
   // 品目の取得
   getItem();
 
+  //　品目の更新
+  updateItem();
+
   // インボイス制度に対応した形式の請求書の作成
   createNewInvoiceTemplateBilling();
 
@@ -421,7 +424,7 @@ function getPartner() {
   SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
   const row = [];
   for (const attr in partner) {
-    if(attr === 'departments'){
+    if (attr === 'departments') {
       row.push(JSON.stringify(partner[attr]));
       continue;
     }
@@ -433,7 +436,7 @@ function getPartner() {
 /**
  * 取引先の更新
  */
-function updatePartner(){
+function updatePartner() {
   // 取引先の準備
   const partners = getMfClient_().partners.getPartners();
   const partner = partners.data[0];
@@ -442,7 +445,7 @@ function updatePartner(){
   const partnerReqBody = {
     code: partner.code + '_更新',
     name: partner.name + '_更新',
-    name_kana: partner.name + '_更新', 
+    name_kana: partner.name + '_更新',
     name_suffix: '様',
     memo: partner.memo + '_更新',
   }
@@ -502,6 +505,39 @@ function getItems() {
     }
     sheet.appendRow(row);
   }
+}
+
+/**
+ * 品目の更新
+ */
+function updateItem() {
+  // 品目ID
+  const items = getMfClient_().items.getItems();
+  const item = items.data[0];
+
+  // 品目
+  const itemReqBody = {
+    name: item.name + '_更新',
+    code: item.code + '_更新',
+    detail: item.detail + '_更新',
+    unit: item.unit + '_更新',
+    price: 1240,
+    quantity: 1,
+    is_deduct_withholding_tax: false,
+    excise: 'ten_percent',
+  }
+
+  // API実行： 品目の更新
+  const updatedItem = getMfClient_().items.updateItem(item.id, itemReqBody);
+  console.log(updatedItem);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("items");
+  const row = [];
+  for (const attr in updatedItem) {
+    row.push(updatedItem[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 /**

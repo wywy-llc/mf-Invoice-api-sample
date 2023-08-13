@@ -674,6 +674,54 @@ function getBillings() {
 }
 
 /**
+ * 　請求書の更新
+ */
+function updateBilling() {
+  // 請求書の準備
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '入金済み';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const billing = billings.data[0]
+
+  // 請求書
+  const billgingReqBody = {
+    department_id: billing.department_id,
+    title: billing.title + '_更新',
+    memo: billing.memo + '_更新',
+    payment_condition: billing.payment_condition + '_更新',
+    billing_date: billing.billing_date,
+    due_date: billing.due_date,
+    sales_date: billing.sales_date,
+    billing_number: billing.billging_number,
+    note: billing.note + '_更新',
+    document_name: billing.note + '_更新',
+    tag_names: [
+      'タグ_更新'
+    ],
+  }
+
+  // API実行： 請求書の更新
+  const updatedBilling = getMfClient_().billings.updateBilling(billing.id, billgingReqBody);
+  console.log(updatedBilling);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billings");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in updatedBilling) {
+    if (attr === 'items' || attr === 'tag_names') {
+      row.push(JSON.stringify(updatedBilling[attr]));
+      continue;
+    }
+    row.push(updatedBilling[attr]);
+  }
+  sheet.appendRow(row);
+}
+
+/**
  * 請求書の取得
  */
 function getBilling() {

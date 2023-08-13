@@ -303,6 +303,9 @@ function testAllApi() {
   // 請求書一覧の取得
   getBillings();
 
+  // 請求書の更新
+  updateBilling();
+
   // 請求書の取得
   getBilling();
 
@@ -443,7 +446,7 @@ function updatePartner() {
 
   // 取引先オブジェクト
   const partnerReqBody = {
-    code: new Date().getTime().toString(),
+    code: partner.code,
     name: '更新_取引先名',
     name_kana: '更新_カナ',
     name_suffix: '様',
@@ -518,7 +521,7 @@ function updateItem() {
   // 品目
   const itemReqBody = {
     name: '品目_更新',
-    code: new Date().getTime().toString(),
+    code: item.code,
     detail: '品目詳細_更新',
     unit: '単位_更新',
     price: 1240,
@@ -696,7 +699,7 @@ function updateBilling() {
     billing_date: dateUtil.getEndDateLastMonth(),
     due_date: dateUtil.getEndDateBaseMonth(),
     sales_date: dateUtil.getDateString(),
-    billing_number: new Date().getTime().toString(),
+    billing_number: billing.billing_number,
     note: '更新_備考',
     document_name: '更新_帳票名',
     tag_names: [

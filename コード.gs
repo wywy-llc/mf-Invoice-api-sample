@@ -443,11 +443,11 @@ function updatePartner() {
 
   // 取引先オブジェクト
   const partnerReqBody = {
-    code: partner.code + '_更新',
-    name: partner.name + '_更新',
-    name_kana: partner.name + '_更新',
+    code: new Date().getTime().toString(),
+    name: '更新_取引先名',
+    name_kana: '更新_カナ',
     name_suffix: '様',
-    memo: partner.memo + '_更新',
+    memo: '更新_メモ',
   }
 
   // API実行： 取引先の更新
@@ -517,10 +517,10 @@ function updateItem() {
 
   // 品目
   const itemReqBody = {
-    name: item.name + '_更新',
-    code: item.code + '_更新',
-    detail: item.detail + '_更新',
-    unit: item.unit + '_更新',
+    name: '品目_更新',
+    code: new Date().getTime().toString(),
+    detail: '品目詳細_更新',
+    unit: '単位_更新',
     price: 1240,
     quantity: 1,
     is_deduct_withholding_tax: false,
@@ -677,6 +677,7 @@ function getBillings() {
  * 　請求書の更新
  */
 function updateBilling() {
+  
   // 請求書の準備
   const baseDate = new Date();
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
@@ -689,17 +690,17 @@ function updateBilling() {
   // 請求書
   const billgingReqBody = {
     department_id: billing.department_id,
-    title: billing.title + '_更新',
-    memo: billing.memo + '_更新',
-    payment_condition: billing.payment_condition + '_更新',
-    billing_date: billing.billing_date,
-    due_date: billing.due_date,
-    sales_date: billing.sales_date,
-    billing_number: billing.billging_number,
-    note: billing.note + '_更新',
-    document_name: billing.note + '_更新',
+    title: '更新_件名',
+    memo: ' 更新_メモ',
+    payment_condition: '更新_振込先',
+    billing_date: dateUtil.getEndDateLastMonth(),
+    due_date: dateUtil.getEndDateBaseMonth(),
+    sales_date: dateUtil.getDateString(),
+    billing_number: new Date().getTime().toString(),
+    note: '更新_備考',
+    document_name: '更新_帳票名',
     tag_names: [
-      'タグ_更新'
+      '更新_タグ'
     ],
   }
 

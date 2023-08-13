@@ -279,6 +279,9 @@ function testAllApi() {
   // 取引先一覧の取得
   getPartners();
 
+  // 取引先の取得
+  getPartner();
+
   // 品目の作成
   createNewItem();
 
@@ -398,6 +401,34 @@ function getPartners() {
   }
 }
 
+/**
+ * 取引先の取得
+ */
+function getPartner() {
+  // 取引先IDの準備
+  const partners = getMfClient_().partners.getPartners();
+  const partnerId = partners.data[0].id;
+
+  // API実行： 取引先の取得
+  const partner = getMfClient_().partners.getPartner(partnerId);
+  console.log(partner);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("partners");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in partner) {
+    if(attr === 'departments'){
+      row.push(JSON.stringify(partner[attr]));
+      continue;
+    }
+    row.push(partner[attr]);
+  }
+  sheet.appendRow(row);
+
+}
+
+
 //== Item(品目) ==
 
 /**
@@ -449,7 +480,6 @@ function getItems() {
     sheet.appendRow(row);
   }
 }
-
 
 /**
  * 品目の取得

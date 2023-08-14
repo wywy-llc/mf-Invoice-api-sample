@@ -247,7 +247,10 @@ function getMfCredentials_() {
  */
 function showMfApiAuthDialog() {
   const credentials = getMfCredentials_();
-  MfInvoiceApi.showMfApiAuthDialog(credentials.clientId, credentials.clientSecret);
+  MfInvoiceApi.showMfApiAuthDialog(
+    credentials.clientId,
+    credentials.clientSecret
+  );
 }
 
 /**
@@ -256,7 +259,11 @@ function showMfApiAuthDialog() {
  */
 function mfCallback(request) {
   const credentials = getMfCredentials_();
-  return MfInvoiceApi.mfCallback(request, credentials.clientId, credentials.clientSecret);
+  return MfInvoiceApi.mfCallback(
+    request,
+    credentials.clientId,
+    credentials.clientSecret
+  );
 }
 
 /**
@@ -265,7 +272,10 @@ function mfCallback(request) {
  */
 function getMfClient_() {
   const credentials = getMfCredentials_();
-  return MfInvoiceApi.createClient(credentials.clientId, credentials.clientSecret);
+  return MfInvoiceApi.createClient(
+    credentials.clientId,
+    credentials.clientSecret
+  );
 }
 
 /**

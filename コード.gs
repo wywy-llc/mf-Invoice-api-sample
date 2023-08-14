@@ -223,9 +223,9 @@ function onOpen() {
 }
 
 /**
- * MF請求書API認証ダイアログを表示します。
+ * MF認証情報を取得します。
  */
-function showMfApiAuthDialog() {
+function getMfCredential_() {
   const scriptProps = PropertiesService.getScriptProperties();
   const clientId = scriptProps.getProperty('CLIENT_ID');
   if (!clientId) {
@@ -235,7 +235,19 @@ function showMfApiAuthDialog() {
   if (!clientSecret) {
     throw new Error('CLIENT_SECRETが設定されていません。');
   }
-  MfInvoiceApi.showMfApiAuthDialog(clientId, clientSecret);
+  const credential = {
+    clientId: clientId,
+    clientSecret: clientSecret,
+  };
+  return credential;
+}
+
+/**
+ * MF請求書API認証ダイアログを表示します。
+ */
+function showMfApiAuthDialog() {
+  const credential = getMfCredential_();
+  MfInvoiceApi.showMfApiAuthDialog(credential.clientId, credential.clientSecret);
 }
 
 /**
@@ -243,16 +255,8 @@ function showMfApiAuthDialog() {
  * @param request
  */
 function mfCallback(request) {
-  const scriptProps = PropertiesService.getScriptProperties();
-  const clientId = scriptProps.getProperty('CLIENT_ID');
-  if (!clientId) {
-    throw new Error('CLIENT_IDが設定されていません。');
-  }
-  const clientSecret = scriptProps.getProperty('CLIENT_SECRET');
-  if (!clientSecret) {
-    throw new Error('CLIENT_SECRETが設定されていません。');
-  }
-  return MfInvoiceApi.mfCallback(request, clientId, clientSecret);
+  const credential = getMfCredential_();
+  return MfInvoiceApi.mfCallback(request, credential.clientId, credential.clientSecret);
 }
 
 /**
@@ -260,10 +264,8 @@ function mfCallback(request) {
  * @returns {MfClient}
  */
 function getMfClient_() {
-  const scriptProps = PropertiesService.getScriptProperties();
-  const clientId = scriptProps.getProperty('CLIENT_ID');
-  const clientSecret = scriptProps.getProperty('CLIENT_SECRET');
-  return MfInvoiceApi.createClient(clientId, clientSecret);
+  const credential = getMfCredential_();
+  return MfInvoiceApi.createClient(credential.clientId, credential.clientSecret);
 }
 
 /**
@@ -862,6 +864,55 @@ function getQuotes() {
     }
     sheet.appendRow(row);
   }
+}
+
+/**
+ * 　見積書の更新
+ */
+function updateQuote() {
+  
+  // 見積書の準備
+  // 日付操作
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '未設定';
+  const quotes = getMfClient_().quotes.getQuotes(from, to, query);
+  const quote = quotes.data[0];
+
+  // 見積書
+  const quoteReqBody = {
+    department_id: quote.department_id,
+    quote_number: quote.quote_number,
+    title: '更新_件名',
+    memo: '更新_メモ',
+    quote_date: dateUtil.getEndDateLastMonth(),
+    expired_date: dateUtil.getDateString(),
+    note: '更新_備考',
+    tag_names: [
+      '更新_タグ'
+    ],
+  }
+
+  console.log(quoteReqBody);
+
+  // API実行： 見積書の更新
+  const updatedQuote = getMfClient_().quotes.updateQuote(quote.id, quoteReqBody);
+  console.log(updatedQuote);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("quotes");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in updatedQuote) {
+    if (attr === 'items' || attr === 'updatedQuote') {
+      row.push(JSON.stringify(updatedQuote[attr]));
+      continue;
+    }
+    row.push(updatedQuote[attr]);
+  }
+  sheet.appendRow(row);
 }
 
 /**

@@ -321,6 +321,9 @@ function testAllApi() {
   // 請求書の取得
   getBilling();
 
+  // 請求書の削除
+  deleteBilling();
+
   // 見積書の作成
   createNewQuote();
 
@@ -748,7 +751,7 @@ function getBilling() {
   const to = dateUtil.getEndDateNextMonth();
   const query = '入金済み';
   const billings = getMfClient_().billings.getBillings(from, to, query);
-  const billingId = billings.data[0].id
+  const billingId = billings.data[0].id;
 
   // API実行： 請求書の取得
   const billing = getMfClient_().billings.getBilling(billingId);
@@ -766,6 +769,52 @@ function getBilling() {
     row.push(billing[attr]);
   }
   sheet.appendRow(row);
+}
+
+/**
+ * 請求書の削除
+ */
+function deleteBilling() {
+  // 請求書IDの取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const targetBillingId = billings.data[0].id;
+  console.log('削除対象: ' + targetBillingId)
+
+  // API実行： 請求書の削除
+  const result = getMfClient_().billings.deleteBilling(targetBillingId);
+  console.log(result);
+
+  if(!result){
+    // 削除に失敗した場合は処理しない。
+    return ;
+  }
+
+  // スプレッドシートから削除
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billings");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  if (sheet.getLastRow() - 1 === 0) {
+    // 削除する行が無いので処理を中止する。
+    return;
+  }
+  sheet.getRange(
+    2,
+    1,
+    sheet.getLastRow() - 1,
+    sheet.getLastColumn()
+  ).getValues().forEach((row, index) => {
+    const rowPosition = index + 2;
+    const billingId = row[0];
+    if (targetBillingId === billingId) {
+      sheet.deleteRow(rowPosition);
+      // 削除に成功したら処理をやめる
+      return;
+    }
+  });
 }
 
 //== Quote(見積書) ==

@@ -20,7 +20,7 @@ function initialize() {
       }
     }
   }
-  const headers = {
+  const schemas = {
     office: [
       'id',
       'name',
@@ -127,6 +127,20 @@ function initialize() {
       'total_price',
       'registration_code',
       'use_invoice_template'],
+    billingItems: [
+      'id',
+      'name',
+      'code',
+      'detail',
+      'unit',
+      'price',
+      'quantity',
+      'is_deduct_withholding_tax',
+      'excise',
+      'delivery_date',
+      'delivery_number',
+      'created_at',
+      'updated_at'],
     quotes: [
       'id',
       'pdf_url',
@@ -178,23 +192,24 @@ function initialize() {
   };
   const initSheets = () => {
     // シート作成
-    const client = getMfClient_();
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-    for (const attr in client) {
-      let sheet = spreadsheet.getSheetByName(attr);
+
+    for (const schema of Object.keys(schemas)) {
+      let sheet = spreadsheet.getSheetByName(schema);
       if (sheet) {
+        // シートの削除（初期化のため）
         spreadsheet.deleteSheet(sheet);
       }
-      sheet = spreadsheet.insertSheet(attr);
-      const headerNames = headers[attr];
-      if (!headerNames) {
-        continue;
-      }
-      const range = sheet.getRange(1, 1, 1, headerNames.length);
+      // シートの挿入
+      sheet = spreadsheet.insertSheet(schema);
+      const attrs = schemas[schema];
+      const range = sheet.getRange(1, 1, 1, attrs.length);
       range.setBackground("#bdbdbd");
-      range.setValues([headerNames]);
-      if (headerNames.length < sheet.getMaxColumns()) {
-        sheet.deleteColumns(headerNames.length + 1, sheet.getMaxColumns() - headerNames.length);
+      range.setValues([attrs]);
+
+      // 不要な列を削除する
+      if (attrs.length < sheet.getMaxColumns()) {
+        sheet.deleteColumns(attrs.length + 1, sheet.getMaxColumns() - attrs.length);
       }
     }
   }
@@ -770,6 +785,40 @@ function getBilling() {
   }
   sheet.appendRow(row);
 }
+/**
+ * 請求書に紐づく品目一覧の取得
+ */
+function getBillingItems() {
+  // 請求書IDの取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const billingId = billings.data[0].id;
+
+  // API実行： 請求書一覧の取得
+  const billingItems = getMfClient_().billings.getBillingItems(billingId);
+  console.log(billingItems.data[0]);
+  console.log('件数: ' + billings.pagination.total_count);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billingItems");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  for (const billingItem of billingItems.data) {
+    const row = [];
+    for (const attr in billingItem) {
+      if (attr === 'items' || attr === 'tag_names') {
+        row.push(JSON.stringify(billingItem[attr]));
+        continue;
+      }
+      row.push(billingItem[attr]);
+    }
+    sheet.appendRow(row);
+  }
+}
+
 
 /**
  * 請求書の削除
@@ -789,9 +838,9 @@ function deleteBilling() {
   const result = getMfClient_().billings.deleteBilling(targetBillingId);
   console.log(result);
 
-  if(!result){
+  if (!result) {
     // 削除に失敗した場合は処理しない。
-    return ;
+    return;
   }
 
   // スプレッドシートから削除

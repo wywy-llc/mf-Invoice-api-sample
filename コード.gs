@@ -785,6 +785,102 @@ function getBilling() {
   }
   sheet.appendRow(row);
 }
+
+/**
+ * 請求書の入金ステータス変更
+ */
+function updatePaymentStatus() {
+  // 請求書の取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const billing = billings.data[0];
+  console.log('更新前: ' + billing.payment_status);
+
+  // API実行： 請求書の入金ステータス変更
+  // '0' - 未設定
+  // '1' - 未入金
+  // '2' - 入金済み
+  const updatedBilling = getMfClient_().billings.updatePaymentStatus(billing.id, '2');
+  console.log('更新後: ' + updatedBilling.payment_status);
+
+  // スプレッドシートを更新
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billings");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  if (sheet.getLastRow() - 1 === 0) {
+    // 更新する行が無いので処理を中止する。
+    return;
+  }
+  sheet.getRange(
+    2,
+    1,
+    sheet.getLastRow() - 1,
+    sheet.getLastColumn()
+  ).getValues().forEach((row, index) => {
+    const rowPosition = index + 2;
+    const billingId = row[0];
+    if (updatedBilling.id === billingId) {
+      // 入金ステータスの列番号
+      const paymentStatusColumn = 21;
+
+      // 入金ステータスの更新
+      sheet.getRange(rowPosition, paymentStatusColumn, 1, 1).setValue(updatedBilling.payment_status);
+
+      // 更新成功したら処理をやめる
+      return;
+    }
+  });
+}
+
+/**
+ * 請求書の郵送依頼
+ */
+function applyToPostBilling() {
+  // 請求書の取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const postBilling = billings.data[0];
+  console.log('更新前: ' + postBilling.posting_status);
+
+  // API実行： 請求書の郵送依頼
+  const result = getMfClient_().billings.applyToPostBilling(postBilling.id);
+  console.log(result);
+
+  // API実行： 請求書の取得
+  const billing = getMfClient_().billings.getBilling(postBilling.id);
+  console.log('更新後: ' + billing.posting_status);
+}
+
+/**
+ * 請求書の郵送キャンセル
+ */
+function cancelPostBilling() {
+  // 請求書の取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const cancelBilling = billings.data[0];
+  console.log('更新前: ' + cancelBilling.posting_status);
+
+  // API実行： 請求書の郵送キャンセル
+  const result = getMfClient_().billings.cancelPostBilling(cancelBilling.id);
+  console.log(result);
+
+  // API実行： 請求書の取得
+  const billing = getMfClient_().billings.getBilling(cancelBilling.id);
+  console.log('更新後: ' + billing.posting_status);
+}
+
 /**
  * 請求書に紐づく品目一覧の取得
  */
@@ -819,6 +915,74 @@ function getBillingItems() {
   }
 }
 
+/**
+ * 請求書に紐づく品目の取得
+ */
+function getBillingItem() {
+  // 請求書IDの取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const billing = billings.data[0];
+  const itemId = billing.items[0].id;
+
+  // API実行： 請求書に紐づく品目の取得
+  const billingItem = getMfClient_().billings.getBillingItem(billing.id, itemId);
+  console.log(billingItem);
+
+  // スプレッドシートに追加
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billingItems");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  const row = [];
+  for (const attr in billingItem) {
+    row.push(billingItem[attr]);
+  }
+  sheet.appendRow(row);
+}
+
+/**
+ * 請求書に紐づく品目の削除
+ */
+function deleteBillingItem() {
+  // 請求書IDの取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const billing = billings.data[0];
+  const itemId = billing.items[0].id;
+
+  // API実行： 請求書に紐づく品目の削除
+  const result = getMfClient_().billings.deleteBillingItem(billing.id, itemId);
+  console.log(result);
+
+  // スプレッドシートから削除
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("billingItems");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  if (sheet.getLastRow() - 1 === 0) {
+    // 削除する行が無いので処理を中止する。
+    return;
+  }
+  sheet.getRange(
+    2,
+    1,
+    sheet.getLastRow() - 1,
+    sheet.getLastColumn()
+  ).getValues().forEach((row, index) => {
+    const rowPosition = index + 2;
+    const billingItemId = row[0];
+    if (itemId === billingItemId) {
+      sheet.deleteRow(rowPosition);
+      // 削除に成功したら処理をやめる
+      return;
+    }
+  });
+}
 
 /**
  * 請求書の削除

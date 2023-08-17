@@ -1251,10 +1251,10 @@ function updateOrderStatus() {
   console.log('更新前: ' + quote.order_status);
 
   // API実行： 見積書の受注ステータス変更
-  // '-1' - 失注
-  // '0' - 未設定
-  // '1' - 未受注
-  // '2' - 受注済み
+  // - 失注: '-1'
+  // - 未設定: '0'
+  // - 未受注: '1'
+  // - 受注済み: '2'
   const updatedQuote = getMfClient_().quotes.updateOrderStatus(quote.id, '2');
   console.log('更新後: ' + updatedQuote.order_status);
 

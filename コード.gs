@@ -333,8 +333,23 @@ function testAllApi() {
   // 請求書の更新
   updateBilling();
 
+  // 請求書の入金ステータス変更
+  updatePaymentStatus();
+
   // 請求書の取得
   getBilling();
+
+  // 請求書に紐付く品目の一覧取得
+  getBillingItems();
+
+  // 請求書に紐づく品目の取得
+  getBillingItem();
+
+  // 請求書の郵送依頼
+  applyToPostBilling();
+
+  // 請求書の郵送キャンセル
+  cancelPostBilling();
 
   // 請求書の削除
   deleteBilling();

@@ -6,9 +6,9 @@
     "libraries": [
       {
         "userSymbol": "MfInvoiceApi",
-        "version": "0",
         "libraryId": "1kAOHBDg2JgIT2rRNKIK_x1iERg0Q4IF1uulKs7Q_g8jAn_Y75906TtQ4",
-        "developmentMode": true
+        "version": "15",
+        "developmentMode": false
       }
     ]
   }

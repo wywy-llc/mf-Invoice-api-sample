@@ -126,7 +126,8 @@ function initialize() {
       'subtotal_with_tax_of_ten_percent_excise',
       'total_price',
       'registration_code',
-      'use_invoice_template'
+      'use_invoice_template',
+      'config'
     ],
     billingItems: [
       'id',

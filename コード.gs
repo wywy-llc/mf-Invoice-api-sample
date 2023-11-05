@@ -141,7 +141,8 @@ function initialize() {
       'delivery_date',
       'delivery_number',
       'created_at',
-      'updated_at'
+      'updated_at',
+      'billing_id'
     ],
     quotes: [
       'id',
@@ -202,7 +203,8 @@ function initialize() {
       'is_deduct_withholding_tax',
       'excise',
       'created_at',
-      'updated_at'
+      'updated_at',
+      'quote_id'
     ]
   };
   const initSheets = () => {
@@ -354,6 +356,9 @@ function testAllApi() {
   // 請求書の取得
   getBilling();
 
+  // 請求書に品目を追加
+  attachBillingItem();
+
   // 請求書に紐付く品目の一覧取得
   getBillingItems();
 
@@ -361,16 +366,19 @@ function testAllApi() {
   getBillingItem();
 
   // 請求書の郵送依頼
+  // 本当に郵送依頼されるので、実行後は必ずキャンセルしてください
   // applyToPostBilling();
 
   // 請求書の郵送キャンセル
-  //  cancelPostBilling();
+  // cancelPostBilling();
 
   // 請求書の削除
   deleteBilling();
 
   // 見積書の作成
   createNewQuote();
+
+  // 
 
   // 見積書一覧の取得
   getQuotes();
@@ -382,7 +390,7 @@ function testAllApi() {
   updateOrderStatus();
 
   // 見積書の郵送依頼
-  // 本当に郵送依頼される恐れがあるのでコメントアウト
+  // 本当に郵送依頼されるので、実行後は必ずキャンセルしてください
   // applyToPostQuote()
 
   // 見積書の郵送キャンセル
@@ -541,6 +549,46 @@ function updatePartner() {
   console.log(updatedPartner);
 }
 
+/**
+ * 取引先の削除
+ */
+function deletePartner() {
+  // 取引先の準備
+  const partners = getMfClient_().partners.getPartners();
+  const targetPartnerId = partners.data[0].id;
+
+  // API実行： 取引先の削除
+  const result = getMfClient_().partners.deletePartner(targetPartnerId);
+  console.log(result);
+
+  if (!result) {
+    // 削除に失敗した場合は処理しない。
+    return;
+  }
+
+  // スプレッドシートから削除
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("partners");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  if (sheet.getLastRow() - 1 === 0) {
+    // 削除する行が無いので処理を中止する。
+    return;
+  }
+  sheet.getRange(
+    2,
+    1,
+    sheet.getLastRow() - 1,
+    sheet.getLastColumn()
+  ).getValues().forEach((row, index) => {
+    const rowPosition = index + 2;
+    const billingId = row[0];
+    if (targetPartnerId === billingId) {
+      sheet.deleteRow(rowPosition);
+      // 削除に成功したら処理をやめる
+      return;
+    }
+  });
+}
+
 //== Item(品目) ==
 
 /**
@@ -646,6 +694,46 @@ function getItem() {
     row.push(targetItem[attr]);
   }
   sheet.appendRow(row);
+}
+
+/**
+ * 品目の削除
+ */
+function deleteItem() {
+  // 品目IDの準備
+  const items = getMfClient_().items.getItems();
+  const targetItemId = items.data[0].id;
+
+  // API実行： 品目の削除
+  const result = getMfClient_().items.getItem(targetItemId);
+  console.log(result);
+
+  if (!result) {
+    // 削除に失敗した場合は処理しない。
+    return;
+  }
+
+  // スプレッドシートから削除
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("items");
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(sheet);
+  if (sheet.getLastRow() - 1 === 0) {
+    // 削除する行が無いので処理を中止する。
+    return;
+  }
+  sheet.getRange(
+    2,
+    1,
+    sheet.getLastRow() - 1,
+    sheet.getLastColumn()
+  ).getValues().forEach((row, index) => {
+    const rowPosition = index + 2;
+    const itemId = row[0];
+    if (targetItemId === itemId) {
+      sheet.deleteRow(rowPosition);
+      // 削除に成功したら処理をやめる
+      return;
+    }
+  });
 }
 
 //== Billing(請求書) ==
@@ -886,6 +974,39 @@ function updatePaymentStatus() {
 }
 
 /**
+ * 請求書に品目を追加
+ */
+function attachBillingItem() {
+
+  // 商品ID(item.id)の準備
+  const items = getMfClient_().items.getItems();
+  const item = items.data[0];
+
+  // 請求書の取得
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const billings = getMfClient_().billings.getBillings(from, to, query);
+  const targetBilling = billings.data[0];
+
+  // 追加品目
+  const itemReqBody = {
+    item_id: item.id,
+    quantity: 10,
+  }
+
+  // API実行： 請求書に品目を追加
+  const result = getMfClient_().billings.attachBillingItem(targetBilling.id, itemReqBody);
+  console.log(result);
+
+  if (!result) {
+    throw new Error('請求書に品目を追加するのに失敗しました。')
+  }
+}
+
+/**
  * 請求書の郵送依頼
  */
 function applyToPostBilling() {
@@ -957,6 +1078,7 @@ function getBillingItems() {
     for (const attr in billingItem) {
       row.push(billingItem[attr]);
     }
+    row.push(billingId);
     sheet.appendRow(row);
   }
 }
@@ -986,6 +1108,7 @@ function getBillingItem() {
   for (const attr in billingItem) {
     row.push(billingItem[attr]);
   }
+  row.push(billing.id);
   sheet.appendRow(row);
 }
 
@@ -1185,6 +1308,40 @@ function getQuotes() {
 }
 
 /**
+ * 見積書に品目を追加
+ */
+function attachQuoteItem() {
+  // 商品ID(item.id)の取得
+  const items = getMfClient_().items.getItems();
+  const item = items.data[0];
+
+  // 品目
+  const quoteItemReqBody =
+  {
+    item_id: item.id,
+    quantity: 10,
+  }
+
+  // 見積書IDの準備
+  const baseDate = new Date();
+  const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
+  const from = dateUtil.getEndDateLastMonth();
+  const to = dateUtil.getEndDateNextMonth();
+  const query = '';
+  const quotes = getMfClient_().quotes.getQuotes(from, to, query);
+  const quoteId = quotes.data[0].id;
+
+  // API実行： 見積書に品目を追加
+  const result = getMfClient_().quotes.attachQuoteItem(quoteId, quoteItemReqBody);
+  Logger.log(result);
+
+  if(!result){
+    throw new Error('見積書への品目追加に失敗しました。');
+  }
+
+}
+
+/**
  * 　見積書の更新
  */
 function updateQuote() {
@@ -1381,6 +1538,7 @@ function getQuoteItems() {
     for (const attr in quoteItem) {
       row.push(quoteItem[attr]);
     }
+    row.push(quoteId);
     sheet.appendRow(row);
   }
 }
@@ -1410,6 +1568,7 @@ function getQuoteItem() {
   for (const attr in quoteItem) {
     row.push(quoteItem[attr]);
   }
+  row.push(quote.id);
   sheet.appendRow(row);
 }
 

@@ -345,11 +345,11 @@ function testAllApi() {
   // 請求書一覧の取得
   getBillings();
 
-  // 請求書の更新
-  updateBilling();
-
   // 請求書の入金ステータス変更
   updatePaymentStatus();
+
+  // 請求書の更新
+  updateBilling();
 
   // 請求書の取得
   getBilling();
@@ -361,10 +361,10 @@ function testAllApi() {
   getBillingItem();
 
   // 請求書の郵送依頼
-  applyToPostBilling();
+  // applyToPostBilling();
 
   // 請求書の郵送キャンセル
-  cancelPostBilling();
+  //  cancelPostBilling();
 
   // 請求書の削除
   deleteBilling();
@@ -382,10 +382,11 @@ function testAllApi() {
   updateOrderStatus();
 
   // 見積書の郵送依頼
-  applyToPostQuote()
+  // 本当に郵送依頼される恐れがあるのでコメントアウト
+  // applyToPostQuote()
 
   // 見積書の郵送キャンセル
-  cancelPostQuote()
+  // cancelPostQuote()
 
   // 見積書に紐づく品目一覧の取得
   getQuoteItems();
@@ -735,7 +736,7 @@ function getBillings() {
   const to = dateUtil.getEndDateNextMonth();
 
   // 検索キー
-  const query = '入金済み';
+  const query = '';
 
   // API実行： 請求書一覧の取得
   const billings = getMfClient_().billings.getBillings(from, to, query);
@@ -768,7 +769,7 @@ function updateBilling() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '入金済み';
+  const query = '';
   const billings = getMfClient_().billings.getBillings(from, to, query);
   const billing = billings.data[0]
 
@@ -816,7 +817,7 @@ function getBilling() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '入金済み';
+  const query = '';
   const billings = getMfClient_().billings.getBillings(from, to, query);
   const billingId = billings.data[0].id;
 
@@ -853,10 +854,7 @@ function updatePaymentStatus() {
   console.log('更新前: ' + billing.payment_status);
 
   // API実行： 請求書の入金ステータス変更
-  // '0' - 未設定
-  // '1' - 未入金
-  // '2' - 入金済み
-  const updatedBilling = getMfClient_().billings.updatePaymentStatus(billing.id, '2');
+  const updatedBilling = getMfClient_().billings.updatePaymentStatus(billing.id, MfInvoiceApi.getPaymentStatus('completed'));
   console.log('更新後: ' + updatedBilling.payment_status);
 
   // スプレッドシートを更新
@@ -1163,7 +1161,7 @@ function getQuotes() {
   const to = dateUtil.getEndDateNextMonth();
 
   // 検索キー
-  const query = '未設定';
+  const query = '';
 
   // API実行： 見積一覧の取得
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
@@ -1196,7 +1194,7 @@ function updateQuote() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quote = quotes.data[0];
 
@@ -1244,17 +1242,13 @@ function updateOrderStatus() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quote = quotes.data[0];
   console.log('更新前: ' + quote.order_status);
 
   // API実行： 見積書の受注ステータス変更
-  // - 失注: '-1'
-  // - 未設定: '0'
-  // - 未受注: '1'
-  // - 受注済み: '2'
-  const updatedQuote = getMfClient_().quotes.updateOrderStatus(quote.id, '2');
+  const updatedQuote = getMfClient_().quotes.updateOrderStatus(quote.id, MfInvoiceApi.getOrderStatus('received'));
   console.log('更新後: ' + updatedQuote.order_status);
 
   // スプレッドシートを更新
@@ -1294,7 +1288,7 @@ function getQuote() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quoteId = quotes.data[0].id;
 
@@ -1325,7 +1319,7 @@ function applyToPostQuote() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const postQuote = quotes.data[0];
   console.log('更新前: ' + postQuote.posting_status);
@@ -1348,7 +1342,7 @@ function cancelPostQuote() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const postQuote = quotes.data[0];
   console.log('更新前: ' + postQuote.posting_status);
@@ -1371,7 +1365,7 @@ function getQuoteItems() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quoteId = quotes.data[0].id;
 
@@ -1400,7 +1394,7 @@ function getQuoteItem() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quote = quotes.data[0];
   const itemId = quote.items[0].id;
@@ -1428,7 +1422,7 @@ function deleteQuoteItem() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quote = quotes.data[0];
   const itemId = quote.items[0].id;
@@ -1469,7 +1463,7 @@ function convertQuoteToBilling() {
   const dateUtil = MfInvoiceApi.getDateUtil(baseDate);
   const from = dateUtil.getEndDateLastMonth();
   const to = dateUtil.getEndDateNextMonth();
-  const query = '未設定';
+  const query = '';
   const quotes = getMfClient_().quotes.getQuotes(from, to, query);
   const quote = quotes.data[0];
 

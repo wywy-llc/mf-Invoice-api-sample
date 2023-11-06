@@ -706,7 +706,7 @@ function deleteItem() {
   const targetItemId = items.data[0].id;
 
   // API実行： 品目の削除
-  const result = getMfClient_().items.getItem(targetItemId);
+  const result = getMfClient_().items.deleteItem(targetItemId);
   console.log(result);
 
   if (!result) {

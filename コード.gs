@@ -1331,11 +1331,6 @@ function attachQuoteItem() {
   // API実行： 見積書に品目を追加
   const result = getMfClient_().quotes.attachQuoteItem(quoteId, quoteItemReqBody);
   Logger.log(result);
-
-  if(!result){
-    throw new Error('見積書への品目追加に失敗しました。');
-  }
-
 }
 
 /**

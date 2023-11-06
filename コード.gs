@@ -1001,10 +1001,6 @@ function attachBillingItem() {
   // API実行： 請求書に品目を追加
   const result = getMfClient_().billings.attachBillingItem(targetBilling.id, itemReqBody);
   console.log(result);
-
-  if (!result) {
-    throw new Error('請求書に品目を追加するのに失敗しました。')
-  }
 }
 
 /**
